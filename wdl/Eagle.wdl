@@ -239,9 +239,9 @@ task ExtractUnphasedChromosomeData {
 	command <<<
 		set -euo pipefail
 
-		bcftools view --no-version -Ob -o ~{out} ~{bcf} \
+		bcftools view --no-version -Ob -o ~{filebase}.other.bcf ~{bcf} \
 			-t ^~{sep="," phased_chromosomes} && \
-			bcftools index -f ~{out}
+			bcftools index -f ~{filebase}.other.bcf
 	>>>
 
 	runtime {
@@ -269,7 +269,7 @@ task GatherFinalVcf {
 
 	}
 
-	String filebase = basename(other_chrom_file, "other.bcf")
+	String filebase = basename(other_chrom_file, ".other.bcf")
 
 	output {
 		File out = "~{filebase}.phased.bcf"
@@ -280,8 +280,8 @@ task GatherFinalVcf {
 		set -euo pipefail
 
 		bcftools concat --no-version -Ou --threads ~{threads} ~{sep=" " phased_chrom_files} ~{other_chrom_file} | \
-			bcftools +mochatools --no-version -Ob -o ~{out} -- -f ~{ref_fasta} && \
-			bcftools index -f ~{out}
+			bcftools +mochatools --no-version -Ob -o ~{filebase}.phased.bcf -- -f ~{ref_fasta} && \
+			bcftools index -f ~{filebase}.phased.bcf
 	>>>
 
 	runtime {
