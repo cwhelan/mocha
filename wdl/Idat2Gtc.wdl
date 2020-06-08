@@ -3,7 +3,6 @@ version 1.0
 workflow Idat2Gtc {
 
   input {
-    String sample
     File red_idat
     File green_idat
     File bpm_manifest
