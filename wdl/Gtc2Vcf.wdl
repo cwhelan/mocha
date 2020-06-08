@@ -22,7 +22,7 @@ workflow Gtc2Vcf {
     File ref_fasta_pac
   
     String? gtc2vcf_mocha_docker 
-    Int? gtc2vcf_disk_size 
+    Int? gtc2vcf_disk_size_override 
     Int? gtc2vcf_preemptible_attempts
     Int? gtc2vcf_memory 
 
@@ -63,7 +63,7 @@ workflow Gtc2Vcf {
 
       out_prefix = out_prefix,      
 
-      disk_size = gtc2vcf_disk_size,
+      disk_size_override = gtc2vcf_disk_size_override,
       preemptible_attempts = gtc2vcf_preemptible_attempts,
       docker = gtc2vcf_mocha_docker,
       memory = gtc2vcf_memory
@@ -137,21 +137,29 @@ task Gtc2Vcf {
 
     String out_prefix
 
-    Int disk_size = 50
+    Int? disk_size_override
+
     String docker = "cwhelan/mocha:v1.0"
-    Int threads = 1
+    Int threads = 4
     Int memory = 16
     Int preemptible_attempts = 3
   }
 
   String gtc_dir = "~{out_prefix}_gtcs"
 
-  String bcf_filename = "${out_prefix}.bcf"
+  String bcf_filename = "~{out_prefix}.bcf"
+  Int gtc_size = ceil(size(gtcs, "GiB"))
+  Int bpm_size = ceil(size(bpm_manifest, "GiB"))
+  Int csv_size = ceil(size(csv_manifest, "GiB"))
+  Int egt_size = ceil(size(egt_cluster_file, "GiB"))
+  Int bam_size = ceil(size(flanking_sequence_alignment_bam, "GiB"))
+  Int ref_size = ceil(size(ref_fasta, "GiB"))
+  Int disk_size = select_first([disk_size_override, 10 + bpm_size + csv_size + egt_size + bam_size + ref_size + (gtc_size * 5)])
 
   output {
     File bcf = "~{bcf_filename}"
-    File bcf_idx = "${out_prefix}.bcf.csi"
-    File sex_file = "${out_prefix}.sex"
+    File bcf_idx = "~{out_prefix}.bcf.csi"
+    File sex_file = "~{out_prefix}.sex"
   }
 
   command <<<
@@ -173,8 +181,8 @@ task Gtc2Vcf {
       -f ~{ref_fasta} \
       -x ~{out_prefix}.sex | \
       bcftools sort -Ou -T ./bcftools-sort.XXXXXX | \
-      bcftools norm --no-version -Ob -o ~{out_prefix}.bcf -c x -f ~{ref_fasta} && \
-      bcftools index -f ~{bcf_filename}
+      bcftools norm --no-version -Ob -o ~{out_prefix}.bcf -c x -f ~{ref_fasta}
+    bcftools index -f ~{bcf_filename}
 
   >>>
   runtime {
