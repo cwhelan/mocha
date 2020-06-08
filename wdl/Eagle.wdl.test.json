@@ -1,5 +1,5 @@
 {
-  "Eagle.sex_file": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/d57f5232-5fbe-4ad8-9ac0-52e1f82ab4c6/call-Gtc2Vcf/test_sample_set.sex",
+  "Eagle.sex_file": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/c5dfb8b3-1808-470f-9a30-2dd573b11149/call-Gtc2Vcf/HumanOmni25M-8v1-1_B.sex",
   "Eagle.reference_vcfs": [
     "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/kgp/ALL.chr1_GRCh38.genotypes.20170504.bcf",
     "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/kgp/ALL.chr2_GRCh38.genotypes.20170504.bcf",
@@ -29,7 +29,7 @@
   "Eagle.primary_contigs_list": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/primary_contigs.list",
   "Eagle.segdup_exclusion_annotations": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/dup.grch38.bed.gz",
   "Eagle.ref_fasta_fai": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai",
-  "Eagle.unphased_bcf": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/d57f5232-5fbe-4ad8-9ac0-52e1f82ab4c6/call-Gtc2Vcf/test_sample_set.bcf",
+  "Eagle.unphased_bcf": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/c5dfb8b3-1808-470f-9a30-2dd573b11149/call-Gtc2Vcf/HumanOmni25M-8v1-1_B.bcf",
   "Eagle.reference_vcfs_idx": [
     "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/kgp/ALL.chr1_GRCh38.genotypes.20170504.bcf.csi",
     "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/kgp/ALL.chr2_GRCh38.genotypes.20170504.bcf.csi",
@@ -58,6 +58,6 @@
     ],
   "Eagle.ref_fasta": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
   "Eagle.genetic_map_file": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/genetic_map_hg38_withX.txt.gz",
-  "Eagle.unphased_bcf_idx": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/d57f5232-5fbe-4ad8-9ac0-52e1f82ab4c6/call-Gtc2Vcf/test_sample_set.bcf.csi"
+  "Eagle.unphased_bcf_idx": "gs://broad-methods-cromwell-exec-bucket-v47/Gtc2Vcf/c5dfb8b3-1808-470f-9a30-2dd573b11149/call-Gtc2Vcf/HumanOmni25M-8v1-1_B.bcf.csi"
 }
 
