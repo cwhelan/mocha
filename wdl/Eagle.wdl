@@ -65,6 +65,13 @@ workflow Eagle {
 			ref_fasta = ref_fasta
 	}
 
+	output {
+		File phased_bcf = GatherFinalVcf.out
+		File phased_bcf_idx = GatherFinalVcf.out_idx
+		File excluded_variants = ExcludeVariants.excluded_variants
+		File excluded_variants_idx = ExcludeVariants.excluded_variants_idx
+	}
+
 }
 
 task MinimizeVcf {
@@ -72,7 +79,6 @@ task MinimizeVcf {
 		File bcf
 		File bcf_idx
 
-		Int disk_size = 10
 		String docker = "cwhelan/mocha:v1.0"
 		Int threads = 1
 		Int memory = 2
@@ -81,6 +87,9 @@ task MinimizeVcf {
 	}
 
 	String filebase = basename(bcf, ".bcf")
+
+	Int bcf_size = ceil(size(bcf, "GiB"))
+	Int disk_size = 10 + bcf_size * 2
 
 	output {
 		File out = "~{filebase}.unphased.bcf"
@@ -91,8 +100,8 @@ task MinimizeVcf {
 		set -euo pipefail
 
 		bcftools annotate --no-version -Ob -o ~{filebase}.unphased.bcf ~{bcf} \
-			-x ID,QUAL,^INFO/ALLELE_A,^INFO/ALLELE_B,^FMT/GT,^FMT/BAF,^FMT/LRR && \
-			bcftools index -f ~{filebase}.unphased.bcf
+			-x ID,QUAL,^INFO/ALLELE_A,^INFO/ALLELE_B,^FMT/GT,^FMT/BAF,^FMT/LRR
+		bcftools index -f ~{filebase}.unphased.bcf
 	>>>
 
 	runtime {
@@ -112,13 +121,16 @@ task ExcludeVariants {
 
 		File segdup_exclusion_annotations
 
-		Int disk_size = 10
 		String docker = "cwhelan/mocha:v1.0"
 		Int threads = 1
 		Int memory = 2
 		Int preemptible_attempts = 3
 
 	}
+
+	Int bcf_size = ceil(size(bcf, "GiB"))
+	Int disk_size = 10 + bcf_size * 2
+
 
 	String filebase = basename(bcf, ".bcf")
 	String excluded_variants = "~{filebase}.xcl.bcf"
@@ -140,8 +152,8 @@ task ExcludeVariants {
 			bcftools +mochatools --no-version -Ou -- -x ~{sex_file} -G | \
 			bcftools annotate --no-version -Ob -o ~{excluded_variants} \
 			-i 'FILTER!="." && FILTER!="PASS" || JK<.02 || NS<'$ns' || ExcHet<1e-6 || AC_Sex_Test>6' \
-			-x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test && \
-			bcftools index -f ~{excluded_variants}
+			-x FILTER,^INFO/JK,^INFO/NS,^INFO/ExcHet,^INFO/AC_Sex_Test
+		bcftools index -f ~{excluded_variants}
 	>>>
 
 	runtime {
@@ -169,13 +181,21 @@ task EagleChromosome {
 
 		String chromosome		
 
-		Int disk_size = 100
+		Int pbwtIters = 3
+
 		String docker = "cwhelan/mocha:v1.0"
 		Int threads = 4
-		Int memory = 8
+		Int memory = 16
 		Int preemptible_attempts = 3
 
 	}
+
+	Int bcf_size = ceil(size(unphased_bcf, "GiB"))
+	Int map_size = ceil(size(genetic_map_file, "GiB"))
+	Int vcf_ref_size = ceil(size(vcf_ref, "GiB"))
+	Int excluded_variants_size = ceil(size(excluded_variants, "GiB"))
+	Int disk_size = 10 + map_size + vcf_ref_size + excluded_variants_size + bcf_size * 2 
+
 
 	String filebase = basename(unphased_bcf, ".bcf")
 	String outname = "~{filebase}.~{chromosome}.bcf"
@@ -200,8 +220,8 @@ task EagleChromosome {
 			--outputUnphased \
 			--vcfExclude ~{excluded_variants} \
 			--chrom ~{chromosome} \
-			--pbwtIters 3 && \
-			bcftools index -f ~{outname}
+			--pbwtIters ~{pbwtIters}
+		bcftools index -f ~{outname}
 	>>>
 
 	runtime {
@@ -221,13 +241,15 @@ task ExtractUnphasedChromosomeData {
 
 		Array[String] phased_chromosomes
 
-		Int disk_size = 10
 		String docker = "cwhelan/mocha:v1.0"
 		Int threads = 1
 		Int memory = 2
 		Int preemptible_attempts = 3
 
 	}
+
+	Int bcf_size = ceil(size(bcf, "GiB"))
+	Int disk_size = 10 + bcf_size * 2
 
 	String filebase = basename(bcf, ".bcf")
 
@@ -240,8 +262,8 @@ task ExtractUnphasedChromosomeData {
 		set -euo pipefail
 
 		bcftools view --no-version -Ob -o ~{filebase}.other.bcf ~{bcf} \
-			-t ^~{sep="," phased_chromosomes} && \
-			bcftools index -f ~{filebase}.other.bcf
+			-t ^~{sep="," phased_chromosomes}
+		bcftools index -f ~{filebase}.other.bcf
 	>>>
 
 	runtime {
@@ -261,7 +283,6 @@ task GatherFinalVcf {
 
 		File ref_fasta
 
-		Int disk_size = 10
 		String docker = "cwhelan/mocha:v1.0"
 		Int threads = 4
 		Int memory = 2
@@ -269,7 +290,12 @@ task GatherFinalVcf {
 
 	}
 
-	String filebase = basename(other_chrom_file, ".other.bcf")
+
+	Int bcf_size = ceil(size(phased_chrom_files, "GiB")) + ceil(size(other_chrom_file, "GiB"))
+	Int ref_size = ceil(size(ref_fasta, "GiB"))
+	Int disk_size = 10 + bcf_size * 2 + ref_size
+
+	String filebase = basename(other_chrom_file, ".unphased.other.bcf")
 
 	output {
 		File out = "~{filebase}.phased.bcf"
@@ -280,8 +306,8 @@ task GatherFinalVcf {
 		set -euo pipefail
 
 		bcftools concat --no-version -Ou --threads ~{threads} ~{sep=" " phased_chrom_files} ~{other_chrom_file} | \
-			bcftools +mochatools --no-version -Ob -o ~{filebase}.phased.bcf -- -f ~{ref_fasta} && \
-			bcftools index -f ~{filebase}.phased.bcf
+			bcftools +mochatools --no-version -Ob -o ~{filebase}.phased.bcf -- -f ~{ref_fasta}
+		bcftools index -f ~{filebase}.phased.bcf
 	>>>
 
 	runtime {
