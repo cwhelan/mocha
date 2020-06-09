@@ -1,0 +1,9 @@
+{
+  "Mocha.excluded_variants_idx": "gs://broad-methods-cromwell-exec-bucket-v47/Eagle/52b1f1ca-03cc-47f4-918a-6d26824b9ab4/call-ExcludeVariants/HumanOmni25M-8v1-1_B.unphased.xcl.bcf.csi",
+  "Mocha.excluded_variants": "gs://broad-methods-cromwell-exec-bucket-v47/Eagle/52b1f1ca-03cc-47f4-918a-6d26824b9ab4/call-ExcludeVariants/HumanOmni25M-8v1-1_B.unphased.xcl.bcf",
+  "Mocha.rule": "GRCh38",
+  "Mocha.cnp": "gs://broad-dsde-methods-cwhelan/mocha-resources/GRCh38/res/cnp.grch38.bed",
+  "Mocha.phased_bcf_idx": "gs://broad-methods-cromwell-exec-bucket-v47/Eagle/52b1f1ca-03cc-47f4-918a-6d26824b9ab4/call-GatherFinalVcf/HumanOmni25M-8v1-1_B.unphased.phased.bcf.csi",
+  "Mocha.phased_bcf": "gs://broad-methods-cromwell-exec-bucket-v47/Eagle/52b1f1ca-03cc-47f4-918a-6d26824b9ab4/call-GatherFinalVcf/HumanOmni25M-8v1-1_B.unphased.phased.bcf"
+}
+
